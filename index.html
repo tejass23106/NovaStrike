@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA STRIKE — Neon Space Shooter</title>
+    <meta name="description"
+        content="An intense neon-themed space shooter arcade game with particle effects, power-ups, boss battles, and upgrade systems.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Live Space Background Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+        <div class="stars-bg"></div>
+        <div class="start-content">
+            <div class="logo-glow">
+                <h1 class="game-title">NOVA<span class="accent">STRIKE</span></h1>
+            </div>
+            <p class="tagline">Defend the galaxy. Destroy the darkness.</p>
+            <div class="start-controls">
+                <button id="play-btn" class="neon-btn primary">
+                    <span class="btn-icon">▶</span> LAUNCH MISSION
+                </button>
+                <button id="how-to-btn" class="neon-btn secondary">
+                    <span class="btn-icon">?</span> HOW TO PLAY
+                </button>
+            </div>
+            <div class="high-score-display">
+                <span class="hs-label">HIGH SCORE</span>
+                <span id="hs-value" class="hs-value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- How To Play Screen -->
+    <div id="howto-screen" class="screen">
+        <div class="howto-content">
+            <h2 class="section-title">MISSION BRIEFING</h2>
+            <div class="controls-grid">
+                <div class="control-item">
+                    <div class="key-group">
+                        <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+                    </div>
+                    <span>or Arrow Keys — Move Ship</span>
+                </div>
+                <div class="control-item">
+                    <div class="key-group">
+                        <kbd>SPACE</kbd>
+                    </div>
+                    <span>Auto-fire (hold to shoot)</span>
+                </div>
+                <div class="control-item">
+                    <div class="key-group">
+                        <kbd>X</kbd>
+                    </div>
+                    <span>Deploy Nova Bomb (limited charges)</span>
+                </div>
+                <div class="control-item">
+                    <div class="key-group">
+                        <kbd>P</kbd>
+                    </div>
+                    <span>Pause Game</span>
+                </div>
+            </div>
+            <div class="powerup-info">
+                <h3>POWER-UPS</h3>
+                <div class="powerup-list">
+                    <div class="pu-item"><span class="pu-icon shield">◆</span> Shield — Absorbs hits for 8s</div>
+                    <div class="pu-item"><span class="pu-icon rapid">◆</span> Rapid Fire — 2x fire rate</div>
+                    <div class="pu-item"><span class="pu-icon health">◆</span> Multi Shot — +1 bullet column (max 4)
+                    </div>
+                    <div class="pu-item"><span class="pu-icon health">◆</span> Repair — Restores health</div>
+                    <div class="pu-item"><span class="pu-icon bomb">◆</span> Nova Charge — +1 bomb</div>
+                    <div class="pu-item"><span class="pu-icon rapid">◆</span> Missile ×2 — +1 player missile</div>
+                    <div class="pu-item"><span class="pu-icon shield">◆</span> Bullet Speed — faster projectiles</div>
+                    <div class="pu-item"><span class="pu-icon health">◆</span> Health Boost — +max health, full heal
+                    </div>
+                    <div class="pu-item"><span class="pu-icon rapid">◆</span> Damage — +bullet damage</div>
+                    <div class="pu-item"><span class="pu-icon shield">◆</span> Homing — bullets track enemies for 8s
+                    </div>
+                    <div class="pu-item"><span class="pu-icon health">◆</span> Magnet — pulls rewards toward you for 8s
+                    </div>
+                </div>
+            </div>
+            <button id="back-btn" class="neon-btn secondary">
+                <span class="btn-icon">←</span> BACK
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div id="game-hud">
+            <div class="hud-left">
+                <div class="hud-item">
+                    <span class="hud-label">SCORE</span>
+                    <span id="hud-score" class="hud-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">WAVE</span>
+                    <span id="hud-wave" class="hud-value">1</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">COMBO</span>
+                    <span id="hud-combo" class="hud-value combo-display">×1</span>
+                </div>
+            </div>
+            <div class="hud-center">
+                <div id="wave-announce" class="wave-announce hidden">
+                    <span class="wave-text">WAVE <span id="wave-num">1</span></span>
+                </div>
+                <!-- Boss Health Bar -->
+                <div id="boss-hud" class="boss-hud hidden">
+                    <span id="boss-name" class="boss-name">REAPER DRONE</span>
+                    <div class="boss-health-bar">
+                        <div id="boss-health-fill" class="boss-health-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="hud-right">
+                <div class="hud-item">
+                    <span class="hud-label">HEALTH</span>
+                    <div class="health-bar">
+                        <div id="health-fill" class="health-fill"></div>
+                    </div>
+                </div>
+                <div class="hud-item" id="shield-indicator">
+                    <span class="hud-label">SHIELD</span>
+                    <span id="hud-shield" class="hud-value shield-on">●</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">NOVA BOMBS</span>
+                    <div id="hud-bombs" class="bomb-indicators">
+                        <span class="bomb-pip active">☢</span>
+                        <span class="bomb-pip active">☢</span>
+                        <span class="bomb-pip active">☢</span>
+                    </div>
+                </div>
+                <div class="hud-item hidden" id="missile-indicator">
+                    <span class="hud-label">MISSILES</span>
+                    <span id="hud-missiles" class="hud-value">0</span>
+                </div>
+                <div class="hud-item hidden" id="bulletcolumns-indicator">
+                    <span class="hud-label">BULLET COLUMNS</span>
+                    <span id="hud-bulletcolumns" class="hud-value">1</span>
+                </div>
+                <div class="hud-item hidden" id="bulletspeed-indicator">
+                    <span class="hud-label">BULLET SPEED</span>
+                    <span id="hud-bulletspeed" class="hud-value">1.0×</span>
+                </div>
+                <div class="hud-item hidden" id="damage-indicator">
+                    <span class="hud-label">DAMAGE</span>
+                    <span id="hud-damage" class="hud-value">+0</span>
+                </div>
+                <div class="hud-item hidden" id="firerate-indicator">
+                    <span class="hud-label">FIRE RATE</span>
+                    <span id="hud-firerate" class="hud-value">1.0×</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active power-up timer bars -->
+        <div id="active-powerups" class="active-powerups"></div>
+
+        <!-- Danger Zone Edge Indicators -->
+        <div id="danger-left" class="danger-edge danger-left hidden"></div>
+        <div id="danger-right" class="danger-edge danger-right hidden"></div>
+
+        <!-- Pause Overlay -->
+        <div id="pause-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>PAUSED</h2>
+                <button id="resume-btn" class="neon-btn primary">RESUME</button>
+                <button id="quit-btn" class="neon-btn secondary">QUIT</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen">
+        <div class="gameover-content">
+            <h2 class="gameover-title">MISSION <span class="accent">FAILED</span></h2>
+            <div class="final-stats">
+                <div class="stat-row">
+                    <span class="stat-label">FINAL SCORE</span>
+                    <span id="final-score" class="stat-value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">WAVES SURVIVED</span>
+                    <span id="final-wave" class="stat-value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">ENEMIES DESTROYED</span>
+                    <span id="final-kills" class="stat-value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">ACCURACY</span>
+                    <span id="final-accuracy" class="stat-value">0%</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">BEST COMBO</span>
+                    <span id="final-combo" class="stat-value">×1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">TIME SURVIVED</span>
+                    <span id="final-time" class="stat-value">0:00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">BOSSES DEFEATED</span>
+                    <span id="final-bosses" class="stat-value">0</span>
+                </div>
+                <div id="new-high" class="new-high hidden">★ NEW HIGH SCORE ★</div>
+            </div>
+            <div class="gameover-actions">
+                <button id="retry-btn" class="neon-btn primary">
+                    <span class="btn-icon">↻</span> TRY AGAIN
+                </button>
+                <button id="menu-btn" class="neon-btn secondary">
+                    <span class="btn-icon">⌂</span> MAIN MENU
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
